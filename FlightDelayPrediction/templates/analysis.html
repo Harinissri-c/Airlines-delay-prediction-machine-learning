@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cause Analysis - Weather Focus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            padding: 3rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            border-radius: 24px;
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-box {
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .stat-box h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-box p {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .weather-bar-container {
+            margin-top: 3rem;
+        }
+
+        .bar {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .fill {
+            height: 100%;
+            background: linear-gradient(to right, #3b82f6, #6366f1);
+            transition: width 1s;
+        }
+
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 2rem;
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <nav>
+            <span
+                style="font-weight: 800; font-size: 1.2rem; background: linear-gradient(to right, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AeroMind</span>
+            <div>
+                <a href="/index" style="color: #94a3b8; text-decoration: none; margin-left: 20px;">Predictor</a>
+                <a href="/analysis" style="color: white; text-decoration: none; margin-left: 20px;">Analysis</a>
+                <a href="/logout" style="color: #ec4899; text-decoration: none; margin-left: 20px;">Logout</a>
+            </div>
+        </nav>
+        <div class="card">
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Primary Delay Causes</h1>
+            <p style="color: #94a3b8; margin-bottom: 3rem;">In-depth analysis of factors affecting international flight
+                departures based on 500,000+ historical records.</p>
+            <div class="grid">
+                <div class="stat-box">
+                    <h2>{{ "%.1f"|format(stats.delay_causes.WeatherDelay|default(4.5)) }} m</h2>
+                    <p>Avg Weather Impact</p>
+                </div>
+                <div class="stat-box">
+                    <h2>{{ "%.1f"|format(stats.delay_causes.CarrierDelay|default(19.2)) }} m</h2>
+                    <p>Avg Carrier Delay</p>
+                </div>
+                <div class="stat-box">
+                    <h2>{{ "%.1f"|format(stats.delay_causes.LateAircraftDelay|default(22.8)) }} m</h2>
+                    <p>Late Aircraft Ripple</p>
+                </div>
+            </div>
+            <div class="weather-bar-container">
+                <h3 style="margin-bottom: 2rem;">Month-wise Weather Vulnerability</h3>
+                {% for month, val in stats.weather_by_month.items() %}
+                <div class="bar-label"><span>Month {{ month }}</span><span>{{ "%.2f"|format(val) }} min avg weather
+                        delay</span></div>
+                <div class="bar">
+                    <div class="fill" style="width: {{ val * 5 }}%;"></div>
+                </div>
+                {% endfor %}
+            </div>
+            <a href="/index" class="back-btn">← Return to Predictor</a>
+        </div>
+    </div>
+</body>
+
+</html>

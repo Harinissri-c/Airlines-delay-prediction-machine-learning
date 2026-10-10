@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroMind AI - Weather-Based Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            margin-left: 2rem;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 2.5rem;
+            border-radius: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            font-size: 0.8rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .btn-predict {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .result-panel {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .prob-large {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin: 1rem 0;
+        }
+
+        .status-pill {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+        }
+
+        .risk-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid #f87171;
+        }
+
+        .risk-low {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid #4ade80;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo">AeroMind Intelligence</div>
+        <div class="nav-links">
+            <a href="/index">Predictor</a>
+            <a href="/analysis">Cause Analysis</a>
+            <a href="/heatmap">Global Heatmap</a>
+            <a href="/tips">Travel Tips</a>
+            <a href="/logout"
+                style="color: #ec4899; font-weight: 700; border: 1px solid rgba(236,72,153,0.3); padding: 0.5rem 1rem; border-radius: 10px; font-size: 0.8rem;">Logout</a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="hero">
+            <h1>Predictive Weather Analysis</h1>
+            <p>Welcome, {{ session.user }}. Precision international delay forecasting powered by atmospheric historical
+                data.</p>
+        </div>
+        <div class="grid">
+            <div class="card">
+                <form action="/predict" method="POST">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Month</label>
+                            <select name="month" class="form-control">
+                                {% for m in range(1, 13) %}
+                                <option value="{{ m }}" {{ 'selected' if input_data and input_data.month|int==m }}>Month
+                                    {{ m }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Weather Conditions</label>
+                            <select name="weather_severity" class="form-control">
+                                <option value="0" {{ 'selected' if input_data and input_data.weather_severity|int==0 }}>
+                                    Clear / Sunny</option>
+                                <option value="1" {{ 'selected' if input_data and input_data.weather_severity|int==1 }}>
+                                    Rain / Fog</option>
+                                <option value="2" {{ 'selected' if input_data and input_data.weather_severity|int==2 }}>
+                                    Heavy Storms</option>
+                                <option value="3" {{ 'selected' if input_data and input_data.weather_severity|int==3 }}>
+                                    Blizzard / Extreme</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Origin (IATA)</label>
+                            <input type="text" name="origin" class="form-control"
+                                value="{{ input_data.origin if input_data else 'SFO' }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Destination (IATA)</label>
+                            <input type="text" name="dest" class="form-control"
+                                value="{{ input_data.dest if input_data else 'LHR' }}">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Day of Week</label>
+                            <input type="number" name="day_of_week" class="form-control"
+                                value="{{ input_data.day_of_week if input_data else 1 }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Departure Time</label>
+                            <input type="number" name="crs_dep_time" class="form-control"
+                                value="{{ input_data.crs_dep_time if input_data else 1200 }}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Carrier</label>
+                        <input type="text" name="carrier" class="form-control"
+                            value="{{ input_data.carrier if input_data else 'AA' }}">
+                    </div>
+                    <input type="hidden" name="day_of_month" value="1">
+                    <button type="submit" class="btn-predict">Calculate Risk</button>
+                </form>
+            </div>
+            <div class="card result-panel">
+                {% if result %}
+                <span class="status-pill {{ 'risk-high' if result.status == 1 else 'risk-low' }}">
+                    {{ result.prediction }}
+                </span>
+                <div class="prob-large">{{ result.probability }}</div>
+                <span style="color: #64748b; font-size: 0.9rem;">Confidence level considering <b
+                        style="color: white;">{{ result.weather_impact }}</b> weather impact</span>
+                <div
+                    style="margin-top: 2rem; text-align: left; width: 100%; border-top: 1px solid var(--glass-border); padding-top: 1rem;">
+                    <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--primary);">International
+                        Routing Insight</h4>
+                    <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.5rem;">Routes between <b>{{
+                            input_data.origin }}</b> and <b>{{ input_data.dest }}</b> historical statistics indicate
+                        <b>{{ 'high' if result.status == 1 else 'minimal' }}</b> turbulence-related delays for this
+                        period.</p>
+                </div>
+                {% else %}
+                <div style="opacity: 0.3;">
+                    <img src="https://img.icons8.com/plasticine/200/000000/cloud.png" style="width: 150px;">
+                    <p>Awaiting input parameters...</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
